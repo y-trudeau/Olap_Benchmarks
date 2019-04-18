@@ -1,0 +1,3 @@
+[submodule "ansible-postgresql"]
+	path = lib/ansible-postgresql
+	url = https://github.com/galaxyproject/ansible-postgresql

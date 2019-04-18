@@ -1,0 +1,4 @@
+---
+s3_bucket_name: olab_benchmarks
+aws_billing_tag: 'iit-billing-tag=consulting-250803'
+aws_project_tag: 'olapbench'
