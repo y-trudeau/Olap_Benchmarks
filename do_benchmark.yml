@@ -1,0 +1,28 @@
+# prototyping to set ideas
+
+# In all cases, the dataset must be generated
+- hosts: localhost
+  roles:
+        - dataset
+        
+- hosts: localhost
+  roles:
+        - aws-ec2
+  when: DbType | regex_search('^ec2')
+        
+- hosts: localhost
+  roles:
+        - aws-rds
+  when: DbType | regex_search('^rds')
+        
+- hosts: localhost
+  roles:
+        - aws-redshift
+  when: DbType | regex_search('^redshift')
+
+# the above commands must have registered the variable "endpoint" which is basically
+# how to connect to the database
+
+- hosts: localhost
+  roles:
+        - bench

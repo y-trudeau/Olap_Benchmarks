@@ -1,0 +1,9 @@
+---
+
+- name: import tcp-ds tasks to create the dataset
+  import_tasks: dataset-tcpds.yml
+  when: "{{ Benchmark }}" == "TpcDS" 
+  
+- name: import tcp-h tasks to create the dataset
+  import_tasks: dataset-tcph.yml
+  when: "{{ Benchmark }}" == "TpcH" 
