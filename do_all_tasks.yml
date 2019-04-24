@@ -7,17 +7,17 @@
         
 - hosts: localhost
   roles:
-        - aws-ec2
+        - build-ec2
   when: DbType | regex_search('^ec2')
         
 - hosts: localhost
   roles:
-        - aws-rds
+        - build-rds
   when: DbType | regex_search('^rds')
         
 - hosts: localhost
   roles:
-        - aws-redshift
+        - build-redshift
   when: DbType | regex_search('^redshift')
 
 # the above commands must have registered the variable "endpoint" which is basically
@@ -26,3 +26,20 @@
 - hosts: localhost
   roles:
         - bench
+
+- hosts: localhost
+  roles:
+        - destroy-ec2
+  when: DbType | regex_search('^ec2')
+        
+- hosts: localhost
+  roles:
+        - destroy-rds
+  when: DbType | regex_search('^rds')
+        
+- hosts: localhost
+  roles:
+        - destroy-redshift
+  when: DbType | regex_search('^redshift')
+
+

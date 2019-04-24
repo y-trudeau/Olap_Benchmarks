@@ -6,4 +6,154 @@ aws_project_tag: 'olapbench'
 datadir: '/bench/data'
 logdir: '/bench/log'
 
+# For the auto parameter
+auto_size_instance:
+  sizes:
+    - size: 1GB
+      types:
+        - type: ec2
+          instance_type: t3.small
+        - type: rds
+          instance_type: db.t3.small
+        - type: redshift
+          instance_type: dc1.large
+          cluster_size: 1
+        - size: 100GB
+      types:
+        - type: ec2
+          instance_type: r5.large
+        - type: rds
+          instance_type: db.r5.large
+        - type: redshift
+          instance_type: dc1.large
+          cluster_size: 1
+    - size: 1TB
+      types:
+        - type: ec2
+          instance_type: r5.2xlarge
+        - type: rds
+          instance_type: db.r5.2xlarge
+        - type: redshift
+          instance_type: dc1.large
+          cluster_size: 8
+    - size: 10TB
+      types:
+        - type: ec2
+          instance_type: r5.4xlarge
+        - type: rds
+          instance_type: db.r5.4xlarge
+        - type: redshift
+          instance_type: dc1.8xlarge
+          cluster_size: 6
+    - size: 100TB
+      types:
+        - type: ec2
+          instance_type: r5.12xlarge 
+        - type: rds
+          instance_type: db.r5.12xlarge
+        - type: redshift
+          instance_type: dc1.8xlarge
+          cluster_size: 50
 
+# some metadata about EC2 instance types, likely useful for configuration
+aws_instances:
+  - type: t3.small
+    mem: 2
+    ncpu: 2
+    ephem: 0
+    ephemsize: 0
+  - type: t3.medium
+    mem: 4
+    ncpu: 2
+    ephem: 0
+    ephemsize: 0
+  - type: r5.large
+    mem: 16 
+    ncpu: 2
+    ephem: 0
+    ephemsize: 0
+  - type: r5.xlarge
+    mem: 32
+    ncpu: 4 
+    ephem: 0
+    ephemsize: 0
+  - type: r5.2xlarge
+    mem: 64
+    ncpu: 8
+    ephem: 0
+    ephemsize: 0
+  - type: r5.4xlarge
+    mem: 128
+    ncpu: 16
+    ephem: 0
+    ephemsize: 0
+  - type: r5.12xlarge
+    mem: 384
+    ncpu: 48
+    ephem: 0
+    ephemsize: 0
+  - type: r5.24xlarge
+    mem: 768
+    ncpu: 96
+    ephem: 0
+    ephemsize: 0
+  - type: r5ad.large
+    mem: 16
+    ncpu: 2
+    ephem: 1
+    ephemsize: 75
+  - type: r5ad.xlarge
+    mem: 32
+    ncpu: 4
+    ephem: 1
+    ephemsize: 150
+  - type: r5ad.2xlarge
+    mem: 64
+    ncpu: 8
+    ephem: 1
+    ephemsize: 300
+  - type: r5ad.4xlarge
+    mem: 128
+    ncpu: 16
+    ephem: 2
+    ephemsize: 300
+  - type: r5ad.12xlarge
+    mem: 384
+    ncpu: 48
+    ephem: 2
+    ephemsize: 900
+  - type: r5ad.24xlarge
+    mem: 768
+    ncpu: 96
+    ephem: 4
+    ephemsize: 900
+  - type: i3.large
+    mem: 15
+    ncpu: 2
+    ephem: 1
+    ephemsize: 475
+  - type: i3.xlarge
+    mem: 30
+    ncpu: 4
+    ephem: 1
+    ephemsize: 950
+  - type: i3.2xlarge
+    mem: 61
+    ncpu: 8
+    ephem: 1
+    ephemsize: 1900
+  - type: i3.4xlarge
+    mem: 122
+    ncpu: 16
+    ephem: 2
+    ephemsize: 1900
+  - type: i3.8xlarge
+    mem: 244
+    ncpu: 32
+    ephem: 4
+    ephemsize: 1900
+  - type: i3.16xlarge
+    mem: 488
+    ncpu: 64
+    ephem: 8
+    ephemsize: 1900

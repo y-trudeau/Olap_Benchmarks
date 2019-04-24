@@ -1,0 +1,6 @@
+---
+
+# In all cases, the dataset must be generated
+- hosts: localhost
+  roles:
+        - dataset

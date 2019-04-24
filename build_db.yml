@@ -1,0 +1,16 @@
+---
+
+- hosts: localhost
+  roles:
+        - build-ec2
+  when: DbType | regex_search('^ec2')
+        
+- hosts: localhost
+  roles:
+        - build-rds
+  when: DbType | regex_search('^rds')
+        
+- hosts: localhost
+  roles:
+        - build-redshift
+  when: DbType | regex_search('^redshift')
