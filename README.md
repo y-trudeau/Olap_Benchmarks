@@ -7,7 +7,7 @@
 
 Ubuntu:
 
-	apt-get install python-boto3 python-boto
+	apt-get install python-boto3 python-boto zstd
 
 ## Database requirements
 
@@ -51,13 +51,13 @@ The type of benchmark to run, possible values are:
 
 ### BenchSize
 
-The size of the dataset for the benchmark, referred as the scaling factor.
+The size in GB of the dataset for the benchmark, referred as the scaling factor.
 
-* 1GB (testing)
-* 100GB (default)
-* 1TB
-* 10TB
-* 100TB
+* 1 (testing)
+* 100 (default)
+* 1024
+* 10240
+* 102400
 
 ### InstanceType 
 

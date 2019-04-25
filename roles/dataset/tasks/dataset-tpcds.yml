@@ -1,9 +1,33 @@
 ---
 
-# Check if the dataset exists in S3
+# To generate the dataset we currently use the ansible host
+# Let's check the amount of free disk space
+- name: check the amount of disk space
+  shell: "df {{ dataset_gen_dir|quote }} -k --output=avail | tail -n 1"
+  register: disk_avail_space
 
+- name: Is there enough disk space in {{ dataset_gen_dir }} for {{ BenchSize }}GB
+  fails:
+    msg: "Insufficient disk space for the dataset"
+  when: disk_avail_space.stdout|int < (BenchSize|int*1024*1024)
 
-# if does not exists, create it
+- name: Get the tpcds tools in: {{ dataset_gen_dir }}
+  unarchive:
+    src: tpcds-min.tar.gz
+    dest: {{ dataset_gen_dir }}
+
+- name: Remove the {{ dataset_gen_dir }}/output dir
+  file:
+    src: {{ dataset_gen_dir }}/output
+    state: absent
+  ignore_errors: True
+
+- name: Create the {{ dataset_gen_dir }}/output dir
+  file:
+    src: {{ dataset_gen_dir }}/output
+    state: directory
+
+# Generate the dataset
 
 
 # push to S3

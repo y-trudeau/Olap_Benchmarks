@@ -1,9 +1,44 @@
 ---
 
+- name: Set default Benchmark if not set
+  vars:
+    Benchmark: tpcds
+  when: Benchmark is not defined
+
+- name: Set default BenchSize if not set
+  vars:
+    BenchSize: 100GB
+  when: BenchSize is not defined
+
+- name: Check if the S3 bucket exists
+  aws_s3:
+    bucket: {{ s3_bucket_name }}
+    mode: list
+    register: list_bucket_result
+  ignore_errors: True
+
+# May need to adjust tags to your context
+- name: Create the S3 bucket if it doesn't exist
+  s3_bucket:
+    name: {{ s3_bucket_name }}
+    tags:
+      iit-billing-tag: consulting-250803
+      project-tag: olapbench-250803
+  when: list_bucket_result.rc > 0
+
+- name: query the S3 bucket for the requested size folder
+  aws_s3:
+    bucket: {{ s3_bucket_name }}
+    prefix: {{ Benchmark }}/{{ BenchSize }}
+    mode: list
+    register: list_folder_result
+  ignore_errors: True
+
+# Jump the the tasks generating the dataset if the folder does not exist
 - name: import tcp-ds tasks to create the dataset
   import_tasks: dataset-tcpds.yml
-  when: "{{ Benchmark }}" == "TpcDS" 
-  
+  when: Benchmark == "tpcds" and list_folder_result.rc > 0
+
 - name: import tcp-h tasks to create the dataset
   import_tasks: dataset-tcph.yml
-  when: "{{ Benchmark }}" == "TpcH" 
+  when: Benchmark == "tpch" and list_folder_result.rc > 0
