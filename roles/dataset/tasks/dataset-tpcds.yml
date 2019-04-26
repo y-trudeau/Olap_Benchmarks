@@ -6,28 +6,66 @@
   shell: "df {{ dataset_gen_dir|quote }} -k --output=avail | tail -n 1"
   register: disk_avail_space
 
-- name: Is there enough disk space in {{ dataset_gen_dir }} for {{ BenchSize }}GB
-  fails:
+- name: Is there enough disk space
+  fail:
     msg: "Insufficient disk space for the dataset"
   when: disk_avail_space.stdout|int < (BenchSize|int*1024*1024)
 
-- name: Get the tpcds tools in: {{ dataset_gen_dir }}
+- name: Get the tpcds tools
   unarchive:
     src: tpcds-min.tar.gz
-    dest: {{ dataset_gen_dir }}
+    dest: "{{ dataset_gen_dir }}"
 
-- name: Remove the {{ dataset_gen_dir }}/output dir
+- name: Removing the output dir
   file:
-    src: {{ dataset_gen_dir }}/output
+    path: "{{ dataset_gen_dir }}/output"
     state: absent
   ignore_errors: True
 
-- name: Create the {{ dataset_gen_dir }}/output dir
+- name: Create the output dir
   file:
-    src: {{ dataset_gen_dir }}/output
+    path: "{{ dataset_gen_dir }}/output"
     state: directory
 
-# Generate the dataset
+- name: Creating the dataset
+  shell: "cd {{ dataset_gen_dir }}/tpcds-min; ./dsdgen -DIR ../output -SCALE {{ BenchSize }}"
 
+- name: Create the output/netezza dir for the queries used by Pg, Redshift, Clickhouse, MonetDB, Presto,  and MySQL
+  file:
+    path: "{{ dataset_gen_dir }}/output/netezza"
+    state: directory
+
+- name: Create the output/oracle dir for the queries used by Oracle
+  file:
+    path: "{{ dataset_gen_dir }}/output/oracle"
+    state: directory
+
+- name: Create the output/sparksql dir for the queries used by Spark SQL
+  file:
+    path: "{{ dataset_gen_dir }}/output/sparksql"
+    state: directory
+
+# We create 9 sets of queries, 1 for power run, 4 for 1st throughtput run, 4 for 2nd throughtput run
+- name: Creating the Queries using the netezza template
+  shell: "cd {{ dataset_gen_dir }}/tpcds-min; ./dsqgen -SCALE {{ BenchSize }} -DIR ./query_templates -INPUT ./query_templates/templates.lst -STREAMS 9 -DIALECT netezza -OUTPUT_DIR ../output/netezza/"
+
+- name: Creating the Queries using the oracle template
+  shell: "cd {{ dataset_gen_dir }}/tpcds-min; ./dsqgen -SCALE {{ BenchSize }} -DIR ./query_templates -INPUT ./query_templates/templates.lst -STREAMS 9 -DIALECT oracle -OUTPUT_DIR ../output/oracle/"
+
+- name: Creating the Queries using the sparksql template
+  shell: "cd {{ dataset_gen_dir }}/tpcds-min; ./dsqgen -SCALE {{ BenchSize }} -DIR ./query_templates -INPUT ./query_templates/templates.lst -STREAMS 9 -DIALECT sparksql -OUTPUT_DIR ../output/sparksql/"
+
+- name: Compression of the data files with zstd
+  shell: "cd {{ dataset_gen_dir }}/output; zstd --rm -T0 *.dat"
 
 # push to S3
+- name: Push the newly generated dataset to S3
+  s3_sync:
+    aws_access_key: "{{ AWS_ACCESS_KEY_ID }}"
+    aws_secret_key: "{{ AWS_SECRET_ACCESS_KEY }}"
+    region: "{{ AWS_REGION }}"
+    bucket: "{{ s3_bucket_name }}"
+    key_prefix: "{{ Benchmark }}/{{ BenchSize }}/"
+    file_root: "{{ dataset_gen_dir }}/output"
+    mode: push
+

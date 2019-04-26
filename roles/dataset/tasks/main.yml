@@ -1,44 +1,59 @@
 ---
-
 - name: Set default Benchmark if not set
-  vars:
+  set_fact:
     Benchmark: tpcds
   when: Benchmark is not defined
 
 - name: Set default BenchSize if not set
-  vars:
+  set_fact:
     BenchSize: 100GB
   when: BenchSize is not defined
 
+- name: Load the AWS Creds
+  include_vars:
+    file: aws_creds.yml
+  when: AWS_ACCESS_KEY_ID is not defined
+    
 - name: Check if the S3 bucket exists
   aws_s3:
-    bucket: {{ s3_bucket_name }}
+    aws_access_key: "{{ AWS_ACCESS_KEY_ID }}"
+    aws_secret_key: "{{ AWS_SECRET_ACCESS_KEY }}"
+    region: "{{ AWS_REGION }}"
+    bucket: "{{ s3_bucket_name }}"
     mode: list
-    register: list_bucket_result
+  register: list_bucket_result
   ignore_errors: True
+
+- debug: msg=" The registered variable output is {{ list_bucket_result }} "
 
 # May need to adjust tags to your context
 - name: Create the S3 bucket if it doesn't exist
   s3_bucket:
-    name: {{ s3_bucket_name }}
+    aws_access_key: "{{ AWS_ACCESS_KEY_ID }}"
+    aws_secret_key: "{{ AWS_SECRET_ACCESS_KEY }}"
+    region: "{{ AWS_REGION }}"
+    name: "{{ s3_bucket_name }}"
     tags:
       iit-billing-tag: consulting-250803
       project-tag: olapbench-250803
-  when: list_bucket_result.rc > 0
+  when: list_bucket_result.failed == True
 
 - name: query the S3 bucket for the requested size folder
   aws_s3:
-    bucket: {{ s3_bucket_name }}
-    prefix: {{ Benchmark }}/{{ BenchSize }}
+    aws_access_key: "{{ AWS_ACCESS_KEY_ID }}"
+    aws_secret_key: "{{ AWS_SECRET_ACCESS_KEY }}"
+    region: "{{ AWS_REGION }}"
+    bucket: "{{ s3_bucket_name }}"
+    prefix: "{{ Benchmark }}/{{ BenchSize }}/"
     mode: list
-    register: list_folder_result
+  register: list_folder_result
   ignore_errors: True
 
 # Jump the the tasks generating the dataset if the folder does not exist
-- name: import tcp-ds tasks to create the dataset
-  import_tasks: dataset-tcpds.yml
-  when: Benchmark == "tpcds" and list_folder_result.rc > 0
+- name: include tcp-ds tasks to create the dataset
+  include: ./dataset-tpcds.yml
+  when: Benchmark == "tpcds" and "Benchmark/BenchSize/" not in list_folder_result.s3_keys
 
 - name: import tcp-h tasks to create the dataset
-  import_tasks: dataset-tcph.yml
-  when: Benchmark == "tpch" and list_folder_result.rc > 0
+  include: ./dataset-tpch.yml
+  when: Benchmark == "tpch" and "Benchmark/BenchSize/" not in list_folder_result.s3_keys

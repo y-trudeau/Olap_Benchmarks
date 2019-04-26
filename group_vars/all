@@ -1,12 +1,12 @@
 ---
 
 # Must be unique in all S3
-s3_bucket_name: percona-olab-benchmarks
+s3_bucket_name: percona-olap-benchmarks
 
 aws_billing_tag: 'iit-billing-tag=consulting-250803'
 aws_project_tag: 'olapbench'
 
-dataset_gen_dir: '/mnt/dataset'
+dataset_gen_dir: '/tank/dataset'
 dataset_compressor: 'zstd'
 
 datadir: '/bench/data'
